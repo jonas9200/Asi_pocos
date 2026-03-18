@@ -4,12 +4,12 @@
     "name": "teste",
     "type": "Poço",
     "location": "as5",
-    "poco_id": "S1",
+    "poco_id": "C2",
     "description": "",
-    "topic_cmd": "as/poco/S1/comando",
-    "topic_dados": "as/poco/S1/dados",
-    "topic_status": "as/poco/S1/status",
+    "topic_cmd": "as/poco/C2/comando",
+    "topic_dados": "as/poco/C2/dados",
+    "topic_status": "as/poco/C2/status",
     "createdAt": "2026-03-18T15:10:04.472Z",
-    "updatedAt": "2026-03-18T15:10:04.472Z"
+    "updatedAt": "2026-03-18T15:10:50.641Z"
   }
 ]
