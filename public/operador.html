@@ -418,7 +418,7 @@ function popupHTML(eq) {
         : '<span style="color:rgba(255,255,255,.35)">---</span>';
 
     const falhaLabel  = rj.Falha != null
-        ? (falha ? '<span style="color:#F44336;font-weight:700">COM FALHA</span>' : '<span style="color:#4CAF50">Sem Falha</span>')
+        ? (falha ? '<span style="color:#F44336;font-weight:700">Com Falha</span>' : '<span style="color:#4CAF50">Sem Falha</span>')
         : '<span style="color:rgba(255,255,255,.35)">---</span>';
 
     const tsLabel = rj.Ultima_atualizacao || rj.Registro || '---';
@@ -594,7 +594,7 @@ function updateCardAllFields(eqId) {
     const falhaEl = card.querySelector('.falha-value');
     if (falhaEl) {
         const falha = rj.Falha === '1' || rj.Falha === 1;
-        falhaEl.textContent = rj.Falha != null ? (falha ? 'COM FALHA' : 'SEM FALHA') : '---';
+        falhaEl.textContent = rj.Falha != null ? (falha ? 'Com Falha' : 'Sem Falha') : '---';
         falhaEl.style.color = rj.Falha != null ? (falha ? '#F44336' : '#4CAF50') : 'rgba(255,255,255,0.4)';
     }
 
@@ -675,7 +675,7 @@ function render() {
         const rj = rawJson[eq.poco_id] || {};
         const auto  = rj.Aut_man != null ? (rj.Aut_man === '1' || rj.Aut_man === 1 ? 'Automático' : 'Manual') : '---';
         const autoColor = rj.Aut_man != null ? (rj.Aut_man === '1' || rj.Aut_man === 1 ? '#4CAF50' : '#FFC107') : 'rgba(255,255,255,0.4)';
-        const falha = rj.Falha != null ? (rj.Falha === '1' || rj.Falha === 1 ? 'COM FALHA' : 'SEM FALHA') : '---';
+        const falha = rj.Falha != null ? (rj.Falha === '1' || rj.Falha === 1 ? 'Com Falha' : 'Sem Falha') : '---';
         const falhaColor = rj.Falha != null ? (rj.Falha === '1' || rj.Falha === 1 ? '#F44336' : '#4CAF50') : 'rgba(255,255,255,0.4)';
         const ts = rj.Ultima_atualizacao || rj.Registro || '---';
 
