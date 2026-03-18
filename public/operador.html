@@ -124,13 +124,13 @@
 <body>
 <div class="container">
     <header>
-        <h1><i class="fas fa-water"></i> AGS Irrigação</h1>
-        <p class="subtitle">Selecione um equipamento para acessar o painel de controle</p>
+        <h1><i class="fas fa-water"></i> AGS Irrigação (Poços)</h1>
+        <p class="subtitle"></p>
     </header>
 
     <div class="mqtt-bar">
         <div class="mqtt-dot" id="mqtt-dot"></div>
-        <span id="mqtt-label">Conectando ao broker MQTT...</span>
+        <span id="mqtt-label">Conectando ao sistema...</span>
     </div>
 
     <div class="filter-bar">
@@ -174,7 +174,7 @@ function connectMQTT() {
     });
 
     mqttClient.on('connect', () => {
-        setMqttBar('ok', 'Broker MQTT conectado — monitorando equipamentos');
+        setMqttBar('ok', 'Sistema Online');
         subscribeAll();
     });
 
@@ -293,7 +293,7 @@ function render() {
             </div>` : ''}
             <div class="card-footer">
                 <button class="access-btn">
-                    <i class="fas fa-tachometer-alt"></i> Acessar Painel de Controle
+                    <i class="fas fa-tachometer-alt"></i> Acessar Painel
                 </button>
             </div>`;
 
