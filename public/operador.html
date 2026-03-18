@@ -242,13 +242,13 @@
 <body>
 <div class="container">
     <header>
-        <h1><i class="fas fa-water"></i> AGS Irrigação</h1>
-        <p class="subtitle">Selecione um equipamento para acessar o painel de controle</p>
+        <h1><i class="fas fa-water"></i> AGS Irrigação (Poços)</h1>
+        <p class="subtitle"></p>
     </header>
 
     <div class="mqtt-bar">
         <div class="mqtt-dot" id="mqtt-dot"></div>
-        <span id="mqtt-label">Conectando ao broker MQTT...</span>
+        <span id="mqtt-label">Conectando ao Servidor</span>
     </div>
 
     <div class="tabs">
@@ -329,7 +329,7 @@ function initMap() {
     }
 
     // Centro padrão no Brasil; se houver equipamentos com coord usa a média deles
-    let centerLat = -15.0, centerLng = -47.0, zoom = 5;
+    let centerLat = -15.0, centerLng = -47.0, zoom = 9;
     const withCoords = equipments.filter(e => e.lat && e.lng);
     if (withCoords.length > 0) {
         centerLat = withCoords.reduce((s,e) => s + e.lat, 0) / withCoords.length;
@@ -407,8 +407,8 @@ function popupHTML(eq) {
                   : st === 'offline' ? '<span style="color:#F44336;font-weight:700">● Offline</span>'
                   : '<span style="color:#FFC107;font-weight:700">● Aguardando</span>';
 
-    const wsLabel = ws === 'LIGADO'    ? '<span style="color:#4CAF50;font-weight:700">LIGADO</span>'
-                  : ws === 'DESLIGADO' ? '<span style="color:#F44336;font-weight:700">DESLIGADO</span>'
+    const wsLabel = ws === 'LIGADO'    ? '<span style="color:#4CAF50;font-weight:700">Ligado</span>'
+                  : ws === 'DESLIGADO' ? '<span style="color:#F44336;font-weight:700">Desligado</span>'
                   : '<span style="color:rgba(255,255,255,.35)">---</span>';
 
     const auto  = rj.Aut_man === '1' || rj.Aut_man === 1;
@@ -419,7 +419,7 @@ function popupHTML(eq) {
         : '<span style="color:rgba(255,255,255,.35)">---</span>';
 
     const falhaLabel  = rj.Falha != null
-        ? (falha ? '<span style="color:#F44336;font-weight:700">COM FALHA</span>' : '<span style="color:#4CAF50">Sem Falha</span>')
+        ? (falha ? '<span style="color:#F44336;font-weight:700">Com falha</span>' : '<span style="color:#4CAF50">Sem Falha</span>')
         : '<span style="color:rgba(255,255,255,.35)">---</span>';
 
     const tsLabel = rj.Ultima_atualizacao || rj.Registro || '---';
@@ -432,15 +432,12 @@ function popupHTML(eq) {
         <div class="popup-name">
             <i class="fas ${ICONS[eq.type]||'fa-cog'}"></i> ${eq.name}
         </div>
-        <div class="popup-row"><span class="popup-key">Tipo</span><span class="popup-val">${eq.type}</span></div>
-        <div class="popup-row"><span class="popup-key">Localização</span><span class="popup-val">${eq.location || '—'}</span></div>
-        <div class="popup-row"><span class="popup-key">ID</span><span class="popup-val"><code style="font-size:.75rem">${eq.poco_id}</code></span></div>
-        <div class="popup-row"><span class="popup-key">ESP32</span><span class="popup-val">${stLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Estado</span><span class="popup-val">${wsLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Modo</span><span class="popup-val">${modoLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Falha</span><span class="popup-val">${falhaLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Atualizado</span><span class="popup-val" style="font-size:.72rem">${tsLabel}</span></div>
-        <div class="popup-row"><span class="popup-key">Coordenadas</span><span class="popup-val" style="font-size:.7rem">${coordLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Localização:</span><span class="popup-val">${eq.location || '—'}</span></div>
+        <div class="popup-row"><span class="popup-key">Equipamento:</span><span class="popup-val">${stLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Estado:</span><span class="popup-val">${wsLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Modo:</span><span class="popup-val">${modoLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Falha:</span><span class="popup-val">${falhaLabel}</span></div>
+        <div class="popup-row"><span class="popup-key">Atualizado:</span><span class="popup-val" style="font-size:.75rem">${tsLabel}</span></div>
         ${eq.description ? `<div class="popup-row"><span class="popup-key">Descrição</span><span class="popup-val">${eq.description}</span></div>` : ''}
         <button class="popup-btn" onclick="window.location.href='/painel?id=${eq.id}'">
             <i class="fas fa-tachometer-alt"></i> Acessar Painel
@@ -521,9 +518,9 @@ function connectMQTT() {
         }
     });
 
-    mqttClient.on('reconnect', () => setMqttBar('warn', 'Reconectando ao broker MQTT...'));
-    mqttClient.on('close',     () => setMqttBar('err',  'Broker MQTT desconectado'));
-    mqttClient.on('error',     () => setMqttBar('err',  'Erro na conexão MQTT'));
+    mqttClient.on('reconnect', () => setMqttBar('warn', 'Reconectando...'));
+    mqttClient.on('close',     () => setMqttBar('err',  'Desconectado'));
+    mqttClient.on('error',     () => setMqttBar('err',  'Erro na conexão '));
 }
 
 function subscribeAll() {
@@ -686,34 +683,29 @@ function render() {
             <div class="card-header">
                 <div class="card-name">
                     <i class="fas ${icon}"></i> ${eq.name}
-                    <span class="type-chip">${eq.type}</span>
                 </div>
                 <div class="status-badge ${st}">
                     <span class="badge-dot"></span>${label}
                 </div>
             </div>
             <div class="card-detail">
-                <span class="detail-label">Localização</span>
+                <span class="detail-label">Localização:</span>
                 <span class="detail-value">${eq.location || '—'}</span>
             </div>
             <div class="card-detail">
-                <span class="detail-label">ID do Poço</span>
-                <span class="detail-value"><code>${eq.poco_id}</code></span>
-            </div>
-            <div class="card-detail">
-                <span class="detail-label">Estado do Poço</span>
+                <span class="detail-label">Estado do Poço:</span>
                 <span class="detail-value well-state-value" style="color:${wsColor};font-weight:700">${wsLabel}</span>
             </div>
             <div class="card-detail">
-                <span class="detail-label">Modo</span>
+                <span class="detail-label">Modo:</span>
                 <span class="detail-value modo-value" style="color:${autoColor};font-weight:700">${auto}</span>
             </div>
             <div class="card-detail">
-                <span class="detail-label">Falha</span>
+                <span class="detail-label">Falha:</span>
                 <span class="detail-value falha-value" style="color:${falhaColor};font-weight:700">${falha}</span>
             </div>
             <div class="card-detail">
-                <span class="detail-label">Última Atualização</span>
+                <span class="detail-label">Última Atualização:</span>
                 <span class="detail-value ts-value" style="font-size:.78rem">${ts}</span>
             </div>
             ${eq.description ? `
