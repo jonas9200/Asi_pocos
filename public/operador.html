@@ -46,30 +46,41 @@
         @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:.35} }
         @keyframes pulse  { 0%{box-shadow:0 0 0 0 rgba(76,175,80,.7)} 70%{box-shadow:0 0 0 7px rgba(76,175,80,0)} 100%{box-shadow:0 0 0 0 rgba(76,175,80,0)} }
 
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid rgba(255,255,255,0.15);
-        }
-        .tab-btn {
-            padding: 10px 24px;
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
-            color: rgba(255,255,255,0.5);
-            font-size: .92rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all .22s;
-            margin-bottom: -2px;
+        /* View bar */
+        .view-bar {
             display: flex;
             align-items: center;
-            gap: 7px;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid rgba(255,255,255,0.12);
         }
-        .tab-btn:hover:not(.active) { color:rgba(255,255,255,.8); }
-        .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+        .view-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .view-title i { font-size: 1.1rem; }
+        .view-switch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 20px;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: .88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .25s;
+            box-shadow: 0 3px 10px rgba(33,150,243,0.35);
+            letter-spacing: .3px;
+        }
+        .view-switch-btn:hover { background:#1976D2; transform:translateY(-2px); box-shadow:0 5px 16px rgba(33,150,243,0.45); }
         .tab-pane { display:none; }
         .tab-pane.active { display:block; }
 
@@ -111,7 +122,7 @@
             transition: all .3s;
         }
         .eq-marker.online-ligado   { background:#1565c0; border-color:#2196F3; }
-        .eq-marker.online-Desligado{ background:#2e7d32; border-color:#4CAF50; }
+        .eq-marker.online-desligado{ background:#2e7d32; border-color:#4CAF50; }
         .eq-marker.offline         { background:#b71c1c; border-color:#F44336; }
         .eq-marker.waiting         { background:#555;    border-color:#aaa; }
 
@@ -251,17 +262,14 @@
         <span id="mqtt-label">Conectando ao broker MQTT...</span>
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" id="tab-btn-lista" onclick="switchTab('lista')">
-            <i class="fas fa-list"></i> Lista
-        </button>
-        <button class="tab-btn" id="tab-btn-mapa" onclick="switchTab('mapa')">
-            <i class="fas fa-map-marked-alt"></i> Mapa
-        </button>
-    </div>
-
     <!-- ABA LISTA -->
     <div class="tab-pane active" id="tab-lista">
+        <div class="view-bar">
+            <div class="view-title"><i class="fa-solid fa-list"></i> Lista de Poços</div>
+            <button class="view-switch-btn" onclick="switchTab('mapa')">
+                <i class="fa-solid fa-map"></i> Ver Mapa
+            </button>
+        </div>
         <div class="filter-bar">
             <input class="search-input" id="search" placeholder="🔍  Buscar por nome ou localização...">
         </div>
@@ -272,6 +280,12 @@
 
     <!-- ABA MAPA -->
     <div class="tab-pane" id="tab-mapa">
+        <div class="view-bar">
+            <div class="view-title"><i class="fa-solid fa-map"></i> Mapa dos Poços</div>
+            <button class="view-switch-btn" onclick="switchTab('lista')">
+                <i class="fa-solid fa-list"></i> Ver Lista
+            </button>
+        </div>
         <div id="map"></div>
         <div class="map-legend">
             <div class="legend-item"><div class="legend-dot" style="background:#2196F3;border:2px solid #64B5F6"></div> Online · Ligado</div>
@@ -312,13 +326,8 @@ const ICONS = {
 // ── TABS ─────────────────────────────────────────────────
 function switchTab(name) {
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
-    document.getElementById('tab-btn-' + name).classList.add('active');
-
-    if (name === 'mapa') {
-        initMap();
-    }
+    if (name === 'mapa') initMap();
 }
 
 function initMap() {
@@ -356,7 +365,7 @@ function markerClass(eqId) {
     const ws = wellState[eq.poco_id];
     if (st === 'offline')  return 'offline';
     if (st === 'waiting')  return 'waiting';
-    return ws === 'Ligado' ? 'online-ligado' : 'online-desligado';
+    return ws === 'LIGADO' ? 'online-ligado' : 'online-desligado';
 }
 
 function makeIcon(eqId) {
@@ -406,8 +415,8 @@ function popupHTML(eq) {
                   : st === 'offline' ? '<span style="color:#F44336;font-weight:700">● Offline</span>'
                   : '<span style="color:#FFC107;font-weight:700">● Aguardando</span>';
 
-    const wsLabel = ws === 'Ligado'    ? '<span style="color:#4CAF50;font-weight:700">Ligado</span>'
-                  : ws === 'Desligado' ? '<span style="color:#F44336;font-weight:700">Desligado</span>'
+    const wsLabel = ws === 'LIGADO'    ? '<span style="color:#4CAF50;font-weight:700">LIGADO</span>'
+                  : ws === 'DESLIGADO' ? '<span style="color:#F44336;font-weight:700">DESLIGADO</span>'
                   : '<span style="color:rgba(255,255,255,.35)">---</span>';
 
     const auto  = rj.Aut_man === '1' || rj.Aut_man === 1;
@@ -418,7 +427,7 @@ function popupHTML(eq) {
         : '<span style="color:rgba(255,255,255,.35)">---</span>';
 
     const falhaLabel  = rj.Falha != null
-        ? (falha ? '<span style="color:#F44336;font-weight:700">Com Falha</span>' : '<span style="color:#4CAF50">Sem Falha</span>')
+        ? (falha ? '<span style="color:#F44336;font-weight:700">COM FALHA</span>' : '<span style="color:#4CAF50">Sem Falha</span>')
         : '<span style="color:rgba(255,255,255,.35)">---</span>';
 
     const tsLabel = rj.Ultima_atualizacao || rj.Registro || '---';
@@ -510,7 +519,7 @@ function connectMQTT() {
 
                 // Estado do poço
                 const ligado = data.Ligado_desligado === '1' || data.Ligado_desligado === 1;
-                const estado = ligado ? 'Ligado' : 'Desligado';
+                const estado = ligado ? 'LIGADO' : 'DESLIGADO';
                 wellState[eqByDados.poco_id] = estado;
 
                 // Sempre atualiza todos os campos do card (inclusive timestamp)
@@ -579,7 +588,7 @@ function updateCardAllFields(eqId) {
     const wsEl = card.querySelector('.well-state-value');
     if (wsEl) {
         wsEl.textContent = ws || '---';
-        wsEl.style.color = ws === 'Ligado' ? '#4CAF50' : ws === 'Desligado' ? '#F44336' : 'rgba(255,255,255,0.4)';
+        wsEl.style.color = ws === 'LIGADO' ? '#4CAF50' : ws === 'DESLIGADO' ? '#F44336' : 'rgba(255,255,255,0.4)';
     }
 
     // Modo
@@ -594,7 +603,7 @@ function updateCardAllFields(eqId) {
     const falhaEl = card.querySelector('.falha-value');
     if (falhaEl) {
         const falha = rj.Falha === '1' || rj.Falha === 1;
-        falhaEl.textContent = rj.Falha != null ? (falha ? 'Com Falha' : 'Sem Falha') : '---';
+        falhaEl.textContent = rj.Falha != null ? (falha ? 'COM FALHA' : 'SEM FALHA') : '---';
         falhaEl.style.color = rj.Falha != null ? (falha ? '#F44336' : '#4CAF50') : 'rgba(255,255,255,0.4)';
     }
 
@@ -670,12 +679,12 @@ function render() {
         const label = st === 'online' ? 'Online' : st === 'offline' ? 'Offline' : 'Aguardando...';
         const ws    = wellState[eq.poco_id];
         const wsLabel = ws || '---';
-        const wsColor = ws === 'Ligado' ? '#4CAF50' : ws === 'Desligado' ? '#F44336' : 'rgba(255,255,255,0.4)';
+        const wsColor = ws === 'LIGADO' ? '#4CAF50' : ws === 'DESLIGADO' ? '#F44336' : 'rgba(255,255,255,0.4)';
 
         const rj = rawJson[eq.poco_id] || {};
         const auto  = rj.Aut_man != null ? (rj.Aut_man === '1' || rj.Aut_man === 1 ? 'Automático' : 'Manual') : '---';
         const autoColor = rj.Aut_man != null ? (rj.Aut_man === '1' || rj.Aut_man === 1 ? '#4CAF50' : '#FFC107') : 'rgba(255,255,255,0.4)';
-        const falha = rj.Falha != null ? (rj.Falha === '1' || rj.Falha === 1 ? 'Com Falha' : 'Sem Falha') : '---';
+        const falha = rj.Falha != null ? (rj.Falha === '1' || rj.Falha === 1 ? 'COM FALHA' : 'SEM FALHA') : '---';
         const falhaColor = rj.Falha != null ? (rj.Falha === '1' || rj.Falha === 1 ? '#F44336' : '#4CAF50') : 'rgba(255,255,255,0.4)';
         const ts = rj.Ultima_atualizacao || rj.Registro || '---';
 
