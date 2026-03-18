@@ -534,7 +534,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         $('ts-esp32').textContent = data.Ultima_atualizacao || data.Registro || '---';
 
         const ligado = data.Ligado_desligado === '1' || data.Ligado_desligado === 1;
-        $('estado-poco').textContent = ligado ? 'LIGADO' : 'DESLIGADO';
+        $('estado-poco').textContent = ligado ? 'Ligado' : 'Desligado';
         $('estado-poco').style.color = ligado ? '#4CAF50' : '#F44336';
         wellState = ligado;
         updateButtons();
@@ -544,7 +544,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         $('modo-op').style.color = auto ? '#4CAF50' : '#FFC107';
 
         const falha = data.Falha === '1' || data.Falha === 1;
-        $('falha-st').textContent = falha ? 'COM FALHA' : 'SEM FALHA';
+        $('falha-st').textContent = falha ? 'Com Falha' : 'Sem Falha';
         $('falha-st').style.color = falha ? '#F44336' : '#4CAF50';
 
         const schedOn = data.Programacao_ativa === true || data.Programacao_ativa === 1;
