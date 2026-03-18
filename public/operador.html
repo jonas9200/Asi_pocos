@@ -111,7 +111,7 @@
             transition: all .3s;
         }
         .eq-marker.online-ligado   { background:#1565c0; border-color:#2196F3; }
-        .eq-marker.online-desligado{ background:#2e7d32; border-color:#4CAF50; }
+        .eq-marker.online-Desligado{ background:#2e7d32; border-color:#4CAF50; }
         .eq-marker.offline         { background:#b71c1c; border-color:#F44336; }
         .eq-marker.waiting         { background:#555;    border-color:#aaa; }
 
@@ -356,7 +356,7 @@ function markerClass(eqId) {
     const ws = wellState[eq.poco_id];
     if (st === 'offline')  return 'offline';
     if (st === 'waiting')  return 'waiting';
-    return ws === 'LIGADO' ? 'online-ligado' : 'online-desligado';
+    return ws === 'Ligado' ? 'online-ligado' : 'online-desligado';
 }
 
 function makeIcon(eqId) {
@@ -406,8 +406,8 @@ function popupHTML(eq) {
                   : st === 'offline' ? '<span style="color:#F44336;font-weight:700">● Offline</span>'
                   : '<span style="color:#FFC107;font-weight:700">● Aguardando</span>';
 
-    const wsLabel = ws === 'LIGADO'    ? '<span style="color:#4CAF50;font-weight:700">LIGADO</span>'
-                  : ws === 'DESLIGADO' ? '<span style="color:#F44336;font-weight:700">DESLIGADO</span>'
+    const wsLabel = ws === 'Ligado'    ? '<span style="color:#4CAF50;font-weight:700">Ligado</span>'
+                  : ws === 'Desligado' ? '<span style="color:#F44336;font-weight:700">Desligado</span>'
                   : '<span style="color:rgba(255,255,255,.35)">---</span>';
 
     const auto  = rj.Aut_man === '1' || rj.Aut_man === 1;
@@ -510,7 +510,7 @@ function connectMQTT() {
 
                 // Estado do poço
                 const ligado = data.Ligado_desligado === '1' || data.Ligado_desligado === 1;
-                const estado = ligado ? 'LIGADO' : 'DESLIGADO';
+                const estado = ligado ? 'Ligado' : 'Desligado';
                 wellState[eqByDados.poco_id] = estado;
 
                 // Sempre atualiza todos os campos do card (inclusive timestamp)
@@ -579,7 +579,7 @@ function updateCardAllFields(eqId) {
     const wsEl = card.querySelector('.well-state-value');
     if (wsEl) {
         wsEl.textContent = ws || '---';
-        wsEl.style.color = ws === 'LIGADO' ? '#4CAF50' : ws === 'DESLIGADO' ? '#F44336' : 'rgba(255,255,255,0.4)';
+        wsEl.style.color = ws === 'Ligado' ? '#4CAF50' : ws === 'Desligado' ? '#F44336' : 'rgba(255,255,255,0.4)';
     }
 
     // Modo
@@ -670,7 +670,7 @@ function render() {
         const label = st === 'online' ? 'Online' : st === 'offline' ? 'Offline' : 'Aguardando...';
         const ws    = wellState[eq.poco_id];
         const wsLabel = ws || '---';
-        const wsColor = ws === 'LIGADO' ? '#4CAF50' : ws === 'DESLIGADO' ? '#F44336' : 'rgba(255,255,255,0.4)';
+        const wsColor = ws === 'Ligado' ? '#4CAF50' : ws === 'Desligado' ? '#F44336' : 'rgba(255,255,255,0.4)';
 
         const rj = rawJson[eq.poco_id] || {};
         const auto  = rj.Aut_man != null ? (rj.Aut_man === '1' || rj.Aut_man === 1 ? 'Automático' : 'Manual') : '---';
