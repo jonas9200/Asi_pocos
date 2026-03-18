@@ -313,7 +313,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <i class="fas fa-question-circle modal-icon"></i>
-            <h3 class="modal-title">Confirmar Comando</h3>
+            <h3 class="modal-title">Confirmar </h3>
         </div>
         <div class="modal-body">
             <p class="modal-message" id="modalMessage"></p>
@@ -642,7 +642,6 @@ document.addEventListener('DOMContentLoaded', async function () {
             'Início':      $('schedStart').value,
             'Parada':      $('schedEnd').value,
             'Dias':        maskToDays(mask),
-            'Comando':     cmd,
         }, () => {
             publish(T.CMD, cmd);
             lastSchedMask = mask;
@@ -654,7 +653,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     $('ligar-btn').onclick = () => {
         openModal(`Deseja LIGAR ${EQ.name}?`, {
             'Equipamento': EQ.name,
-            'Comando':     'Liga',
             'Ação':        'Poço será ligado imediatamente',
         }, () => { publish(T.CMD, 'Liga'); showOk('Comando LIGAR enviado!'); });
     };
@@ -662,7 +660,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     $('desligar-btn').onclick = () => {
         openModal(`Deseja DESLIGAR ${EQ.name}?`, {
             'Equipamento': EQ.name,
-            'Comando':     'Desliga',
             'Ação':        'Poço será desligado imediatamente',
         }, () => { publish(T.CMD, 'Desliga'); showOk('Comando DESLIGAR enviado!'); });
     };
