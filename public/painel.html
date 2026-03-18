@@ -344,7 +344,7 @@
         </div>
         <div class="sched-section"><i class="fas fa-calendar-week" style="margin-right:5px;color:var(--accent)"></i>Dias da Semana</div>
         <div class="days-grid" id="daysGrid"></div>
-        <button class="btn-success" id="schedSaveBtn" style="margin-top:0"><i class="fas fa-paper-plane"></i> Salvar programção</button>
+        <button class="btn-success" id="schedSaveBtn" style="margin-top:0"><i class="fas fa-paper-plane"></i> Salvar Programação</button>
     </div>
 </div>
 
@@ -357,7 +357,7 @@
             <div class="status-bar">
                 <div class="status-item">
                     <div class="status-indicator disconnected" id="device-status"></div>
-                    <span id="device-text">Offline</span>
+                    <span id="device-text">Sistema Offline</span>
                 </div>
             </div>
         </header>
@@ -371,7 +371,7 @@
 
         <!-- Controle Manual -->
         <div class="card">
-            <h2><i class="fas fa-sliders-h"></i> Controle</h2>
+            <h2><i class="fas fa-sliders-h"></i> Controle Manual</h2>
             <div class="control-buttons">
                 <button class="btn-success" id="ligar-btn"    disabled><i class="fas fa-play"></i>  Ligar Poço</button>
                 <button class="btn-danger"  id="desligar-btn" disabled><i class="fas fa-stop"></i> Desligar Poço</button>
@@ -390,7 +390,7 @@
                 <span class="status-data" id="modo-op">---</span>
             </div>
             <div class="status-value">
-                <span class="status-label">Falha na Bomba:</span>
+                <span class="status-label">Falha do Sistema:</span>
                 <span class="status-data" id="falha-st">---</span>
             </div>
             <div class="status-value">
@@ -401,7 +401,7 @@
 
         <!-- Programação -->
         <div class="card">
-            <h2><i class="fas fa-clock"></i> Programação Horário de Ponto</h2>
+            <h2><i class="fas fa-clock"></i> Programação Horária</h2>
             <div class="status-value">
                 <span class="status-label">Programação Ativa:</span>
                 <span class="status-data" id="sched-ativa">---</span>
@@ -494,16 +494,20 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // ── STATUS INDICATORS ──
+    let wellState = null; // null = desconhecido, true = ligado, false = desligado
+
     function setDevStatus(online) {
         devOk = online;
         $('device-status').className = 'status-indicator ' + (online ? 'connected' : 'disconnected');
         $('device-text').textContent  = online ? 'Equipamento Online' : 'Equipamento Offline';
+        if (!online) wellState = null; // reseta estado ao ficar offline
         updateButtons();
     }
     function updateButtons() {
         const en = mqttOk && devOk;
-        $('ligar-btn').disabled      = !en;
-        $('desligar-btn').disabled   = !en;
+        // Se estado do poço é conhecido, desabilita o botão correspondente
+        $('ligar-btn').disabled      = !en || wellState === true;
+        $('desligar-btn').disabled   = !en || wellState === false;
         $('btn-edit-sched').disabled = !en;
         $('schedSaveBtn').disabled   = !mqttOk;
     }
@@ -525,13 +529,15 @@ document.addEventListener('DOMContentLoaded', async function () {
     // ── JSON HANDLER ──
     function handleJSON(data) {
         lastMsg = Date.now();
-        if (!devOk) { setDevStatus(true); showOk('ESP32 conectado!'); }
+        if (!devOk) { setDevStatus(true); showOk('Conectado!'); }
 
         $('ts-esp32').textContent = data.Ultima_atualizacao || data.Registro || '---';
 
         const ligado = data.Ligado_desligado === '1' || data.Ligado_desligado === 1;
         $('estado-poco').textContent = ligado ? 'LIGADO' : 'DESLIGADO';
         $('estado-poco').style.color = ligado ? '#4CAF50' : '#F44336';
+        wellState = ligado;
+        updateButtons();
 
         const auto = data.Aut_man === '1' || data.Aut_man === 1;
         $('modo-op').textContent = auto ? 'Automático' : 'Manual';
@@ -640,7 +646,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }, () => {
             publish(T.CMD, cmd);
             lastSchedMask = mask;
-            showOk('Programação enviada ');
+            showOk('Programação salva!');
         });
     };
 
