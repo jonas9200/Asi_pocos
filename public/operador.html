@@ -506,15 +506,21 @@ function connectMQTT() {
         if (eqByDados) {
             try {
                 const data = JSON.parse(msg);
-                // Guarda JSON completo
                 rawJson[eqByDados.poco_id] = data;
-                updateCardJson(eqByDados.id, data);
 
+                // Estado do poço
                 const ligado = data.Ligado_desligado === '1' || data.Ligado_desligado === 1;
                 const estado = ligado ? 'LIGADO' : 'DESLIGADO';
-                if (wellState[eqByDados.poco_id] !== estado) {
-                    wellState[eqByDados.poco_id] = estado;
-                    updateCardWellState(eqByDados.id, estado);
+                wellState[eqByDados.poco_id] = estado;
+
+                // Sempre atualiza todos os campos do card (inclusive timestamp)
+                updateCardAllFields(eqByDados.id);
+
+                // Sempre atualiza marcador do mapa
+                const m = mapMarkers[eqByDados.id];
+                if (m) {
+                    m.setIcon(makeIcon(eqByDados.id));
+                    if (m.isPopupOpen()) m.setPopupContent(popupHTML(eqByDados));
                 }
             } catch(_) {}
         }
@@ -560,29 +566,31 @@ function updateCardBadge(eqId, status) {
     }
 }
 
-// Atualiza o estado do poço e campos do JSON no card
-function updateCardWellState(eqId, estado) {
+// Atualiza todos os campos dinâmicos do card a partir do rawJson
+function updateCardAllFields(eqId) {
     const card = document.querySelector(`.card[data-eq-id="${eqId}"]`);
     if (!card) return;
+
+    const eq  = equipments.find(e => e.id === eqId);
+    const rj  = eq ? (rawJson[eq.poco_id] || {}) : {};
+    const ws  = eq ? wellState[eq.poco_id] : null;
 
     // Estado do poço
     const wsEl = card.querySelector('.well-state-value');
     if (wsEl) {
-        wsEl.textContent = estado;
-        wsEl.style.color = estado === 'LIGADO' ? '#4CAF50' : '#F44336';
+        wsEl.textContent = ws || '---';
+        wsEl.style.color = ws === 'LIGADO' ? '#4CAF50' : ws === 'DESLIGADO' ? '#F44336' : 'rgba(255,255,255,0.4)';
     }
 
-    // Modo, falha e timestamp a partir do rawJson
-    const eq = equipments.find(e => e.id === eqId);
-    const rj = eq ? (rawJson[eq.poco_id] || {}) : {};
-
+    // Modo
     const modoEl = card.querySelector('.modo-value');
     if (modoEl) {
         const auto = rj.Aut_man === '1' || rj.Aut_man === 1;
-        modoEl.textContent  = rj.Aut_man != null ? (auto ? 'Automático' : 'Manual') : '---';
-        modoEl.style.color  = rj.Aut_man != null ? (auto ? '#4CAF50' : '#FFC107') : 'rgba(255,255,255,0.4)';
+        modoEl.textContent = rj.Aut_man != null ? (auto ? 'Automático' : 'Manual') : '---';
+        modoEl.style.color = rj.Aut_man != null ? (auto ? '#4CAF50' : '#FFC107') : 'rgba(255,255,255,0.4)';
     }
 
+    // Falha
     const falhaEl = card.querySelector('.falha-value');
     if (falhaEl) {
         const falha = rj.Falha === '1' || rj.Falha === 1;
@@ -590,15 +598,9 @@ function updateCardWellState(eqId, estado) {
         falhaEl.style.color = rj.Falha != null ? (falha ? '#F44336' : '#4CAF50') : 'rgba(255,255,255,0.4)';
     }
 
+    // Última atualização — sempre atualiza pois muda a cada mensagem
     const tsEl = card.querySelector('.ts-value');
     if (tsEl) tsEl.textContent = rj.Ultima_atualizacao || rj.Registro || '---';
-
-    // Atualiza marcador no mapa
-    const m = mapMarkers[eqId];
-    if (m) {
-        m.setIcon(makeIcon(eqId));
-        if (m.isPopupOpen() && eq) m.setPopupContent(popupHTML(eq));
-    }
 }
 
 // Renderiza o JSON completo no bloco do card
