@@ -25,7 +25,9 @@
     "topic_dados": "as/poco/S1/dados",
     "topic_status": "as/poco/S1/status",
     "createdAt": "2026-03-18T15:19:13.658Z",
-    "updatedAt": "2026-03-18T17:10:44.173Z"
+    "updatedAt": "2026-03-23T18:29:01.505Z",
+    "lat": -19.351728,
+    "lng": -47.374489
   },
   {
     "id": "1773858788600",
