@@ -72,23 +72,26 @@ app.get('/api/equipments', async (_req, res) => {
 
 app.post('/api/equipments', async (req, res) => {
     try {
-        const { name, type, location, poco_id, description, lat, lng } = req.body;
+        const { name, type, location, poco_id, description, lat, lng, nivel_canal } = req.body;
         if (!name || !poco_id) return res.status(400).json({ error: 'name e poco_id são obrigatórios' });
         const list = await readData();
         const item = {
-            id:          Date.now().toString(),
-            name:        name.trim(),
-            type:        (type || 'Poço').trim(),
-            location:    (location || '').trim(),
-            poco_id:     poco_id.trim(),
-            description: (description || '').trim(),
-            lat:         lat != null ? parseFloat(lat) || null : null,
-            lng:         lng != null ? parseFloat(lng) || null : null,
+            id:           Date.now().toString(),
+            name:         name.trim(),
+            type:         (type || 'Poço').trim(),
+            location:     (location || '').trim(),
+            poco_id:      poco_id.trim(),
+            description:  (description || '').trim(),
+            lat:          lat != null ? parseFloat(lat) || null : null,
+            lng:          lng != null ? parseFloat(lng) || null : null,
+            // Sensor de nível vinculado (canal opcional)
+            nivel_canal:  nivel_canal ? nivel_canal.trim() : '',
+            nivel_topic:  nivel_canal ? `Ags/nivel/${nivel_canal.trim()}/dados` : '',
             topic_cmd:    `as/poco/${poco_id.trim()}/comando`,
             topic_dados:  `as/poco/${poco_id.trim()}/dados`,
             topic_status: `as/poco/${poco_id.trim()}/status`,
-            createdAt:   new Date().toISOString(),
-            updatedAt:   new Date().toISOString()
+            createdAt:    new Date().toISOString(),
+            updatedAt:    new Date().toISOString()
         };
         list.push(item);
         await saveData(list);
@@ -101,8 +104,9 @@ app.put('/api/equipments/:id', async (req, res) => {
         const list = await readData();
         const idx  = list.findIndex(e => e.id === req.params.id);
         if (idx === -1) return res.status(404).json({ error: 'Não encontrado' });
-        const { name, type, location, poco_id, description, lat, lng } = req.body;
-        const pid = (poco_id || list[idx].poco_id).trim();
+        const { name, type, location, poco_id, description, lat, lng, nivel_canal } = req.body;
+        const pid  = (poco_id || list[idx].poco_id).trim();
+        const ncal = nivel_canal !== undefined ? nivel_canal.trim() : (list[idx].nivel_canal || '');
         list[idx] = {
             ...list[idx],
             name:         (name        || list[idx].name).trim(),
@@ -112,6 +116,8 @@ app.put('/api/equipments/:id', async (req, res) => {
             description:  (description != null ? description : list[idx].description).trim(),
             lat:          lat != null ? parseFloat(lat) || null : list[idx].lat || null,
             lng:          lng != null ? parseFloat(lng) || null : list[idx].lng || null,
+            nivel_canal:  ncal,
+            nivel_topic:  ncal ? `Ags/nivel/${ncal}/dados` : '',
             topic_cmd:    `as/poco/${pid}/comando`,
             topic_dados:  `as/poco/${pid}/dados`,
             topic_status: `as/poco/${pid}/status`,
