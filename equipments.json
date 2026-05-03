@@ -1,17 +1,1 @@
-[
-  {
-    "id": "1777771910089",
-    "name": "Poço T1",
-    "type": "Poço",
-    "location": "caviuna",
-    "poco_id": "T1",
-    "description": "",
-    "lat": null,
-    "lng": null,
-    "topic_cmd": "as/poco/T1/comando",
-    "topic_dados": "as/poco/T1/dados",
-    "topic_status": "as/poco/T1/status",
-    "createdAt": "2026-05-03T01:31:50.089Z",
-    "updatedAt": "2026-05-03T01:31:50.089Z"
-  }
-]
+[]
