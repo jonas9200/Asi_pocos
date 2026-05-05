@@ -151,5 +151,22 @@
     "topic_status": "as/poco/S14/status",
     "createdAt": "2026-05-05T15:02:26.749Z",
     "updatedAt": "2026-05-05T15:37:19.913Z"
+  },
+  {
+    "id": "1778004400468",
+    "name": "Poço S-04",
+    "type": "Poço",
+    "location": "Sinimbu",
+    "poco_id": "S04",
+    "description": "",
+    "lat": -13.869682,
+    "lng": -45.138354,
+    "nivel_canal": "01",
+    "nivel_topic": "Ags/nivel/01/dados",
+    "topic_cmd": "as/poco/S04/comando",
+    "topic_dados": "as/poco/S04/dados",
+    "topic_status": "as/poco/S04/status",
+    "createdAt": "2026-05-05T18:06:40.468Z",
+    "updatedAt": "2026-05-05T18:06:40.468Z"
   }
 ]
