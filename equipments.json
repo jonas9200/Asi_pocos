@@ -144,12 +144,12 @@
     "description": "",
     "lat": -13.852839,
     "lng": -45.146716,
-    "nivel_canal": "",
-    "nivel_topic": "",
+    "nivel_canal": "01",
+    "nivel_topic": "Ags/nivel/01/dados",
     "topic_cmd": "as/poco/S14/comando",
     "topic_dados": "as/poco/S14/dados",
     "topic_status": "as/poco/S14/status",
     "createdAt": "2026-05-05T15:02:26.749Z",
-    "updatedAt": "2026-05-05T15:02:26.749Z"
+    "updatedAt": "2026-05-05T15:37:19.913Z"
   }
 ]
