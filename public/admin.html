@@ -27,6 +27,11 @@
         .hlink-op { background:rgba(76,175,80,0.18); border:1px solid var(--success); color:var(--success); }
         .hlink-op:hover { background:rgba(76,175,80,0.32); }
         .hlink-gh { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25); color:rgba(255,255,255,0.8); }
+        .sort-bar { display:flex; justify-content:flex-end; margin-bottom:12px; gap:8px; }
+        .sort-btn { background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.15); border-radius:7px; padding:6px 12px; font-size:.75rem; cursor:pointer; transition:all .2s; color:rgba(255,255,255,0.7); display:inline-flex; align-items:center; gap:6px; }
+        .sort-btn:hover { background:rgba(33,150,243,0.2); border-color:var(--accent); color:var(--accent); }
+        .sort-btn.active { background:rgba(33,150,243,0.25); border-color:var(--accent); color:var(--accent); }
+        .sort-btn i { font-size:.7rem; }
 
         .alert-zone { margin-bottom:14px; }
         .alert { padding:11px 15px; border-radius:7px; font-size:.9rem; display:none; animation:slideDown .3s; }
@@ -35,7 +40,7 @@
         .alert-ok  { background:rgba(76,175,80,.2);  border:1px solid var(--success); color:#c8e6c9; }
         .alert-err { background:rgba(244,67,54,.2); border:1px solid var(--danger);  color:#ffcdd2; }
 
-        .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:22px; }
+        .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:12px; }
         .stat-card { background:rgba(255,255,255,0.08); border-radius:10px; padding:16px; text-align:center; border:1px solid rgba(255,255,255,0.1); }
         .stat-num   { font-size:1.9rem; font-weight:bold; color:var(--accent); display:block; }
         .stat-label { font-size:.82rem; opacity:.72; margin-top:3px; }
@@ -156,6 +161,12 @@
         <div class="stat-card"><span class="stat-num" id="s-pocos">0</span><span class="stat-label">Poços</span></div>
         <div class="stat-card"><span class="stat-num" id="s-pivos">0</span><span class="stat-label">Pivôs</span></div>
         <div class="stat-card"><span class="stat-num" id="s-nivel">0</span><span class="stat-label">Com Sensor Nível</span></div>
+    </div>
+
+    <div class="sort-bar">
+        <button class="sort-btn" id="sort-alpha"><i class="fas fa-sort-alpha-down"></i> Ordem Alfabética</button>
+        <button class="sort-btn" id="sort-type"><i class="fas fa-filter"></i> Por Tipo</button>
+        <button class="sort-btn" id="sort-date"><i class="fas fa-calendar-alt"></i> Mais Recentes</button>
     </div>
 
     <div class="dashboard" id="dashboard">
@@ -280,6 +291,7 @@
 <script>
 const $ = id => document.getElementById(id);
 let equipments = [], editingId = null, deletingId = null;
+let currentSort = 'alpha'; // alpha, type, date
 
 const ICONS = { 'Poço':'fa-tint','Pivô Central':'fa-sync-alt','Linear':'fa-arrows-alt-h','Aspersor':'fa-shower','Pluviômetro':'fa-cloud-rain','Outro':'fa-cog' };
 
@@ -315,6 +327,28 @@ async function load() {
     }
 }
 
+function sortEquipments(list) {
+    const sorted = [...list];
+    if (currentSort === 'alpha') {
+        sorted.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    } else if (currentSort === 'type') {
+        sorted.sort((a, b) => {
+            if (a.type === b.type) return a.name.localeCompare(b.name, 'pt-BR');
+            return a.type.localeCompare(b.type, 'pt-BR');
+        });
+    } else if (currentSort === 'date') {
+        sorted.sort((a, b) => {
+            const dateA = a.updatedAt || a.createdAt || '';
+            const dateB = b.updatedAt || b.createdAt || '';
+            if (!dateA && !dateB) return 0;
+            if (!dateA) return 1;
+            if (!dateB) return -1;
+            return new Date(dateB) - new Date(dateA);
+        });
+    }
+    return sorted;
+}
+
 function updateStats() {
     $('s-total').textContent  = equipments.length;
     $('s-pocos').textContent  = equipments.filter(e => e.type === 'Poço').length;
@@ -327,11 +361,13 @@ function render() {
     const dash = $('dashboard');
     dash.innerHTML = '';
 
-    if (equipments.length === 0) {
+    const sortedEquipments = sortEquipments(equipments);
+
+    if (sortedEquipments.length === 0) {
         dash.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i><p>Nenhum equipamento cadastrado.</p><p style="font-size:.9rem;opacity:.6;margin-top:5px">Clique em "+ Adicionar" para começar.</p></div>';
     }
 
-    equipments.forEach(eq => {
+    sortedEquipments.forEach(eq => {
         const icon = ICONS[eq.type] || 'fa-cog';
         const hasNivel = !!(eq.nivel_canal);
         const card = document.createElement('div');
@@ -339,17 +375,17 @@ function render() {
         card.innerHTML = `
             <div class="card-header">
                 <div class="card-name">
-                    <i class="fas ${icon}"></i> ${eq.name}
-                    <span class="type-chip">${eq.type}</span>
-                    ${hasNivel ? `<span class="nivel-chip"><i class="fas fa-ruler-vertical"></i> Nível: ${eq.nivel_canal}</span>` : ''}
+                    <i class="fas ${icon}"></i> ${escapeHtml(eq.name)}
+                    <span class="type-chip">${escapeHtml(eq.type)}</span>
+                    ${hasNivel ? `<span class="nivel-chip"><i class="fas fa-ruler-vertical"></i> Nível: ${escapeHtml(eq.nivel_canal)}</span>` : ''}
                 </div>
             </div>
-            <div class="card-detail"><span class="detail-label">ID do Poço</span><span class="detail-value"><code>${eq.poco_id}</code></span></div>
-            <div class="card-detail"><span class="detail-label">Localização</span><span class="detail-value">${eq.location || '—'}</span></div>
-            <div class="card-detail"><span class="detail-label">Cmd</span><span class="detail-value"><span class="topic-chip">${eq.topic_cmd}</span></span></div>
-            <div class="card-detail"><span class="detail-label">Dados</span><span class="detail-value"><span class="topic-chip">${eq.topic_dados}</span></span></div>
-            ${hasNivel ? `<div class="card-detail"><span class="detail-label" style="color:rgba(0,188,212,0.8)"><i class="fas fa-ruler-vertical"></i> Sensor Nível</span><span class="detail-value"><span class="nivel-topic-chip">${eq.nivel_topic}</span></span></div>` : ''}
-            ${eq.description ? `<div class="card-detail"><span class="detail-label">Descrição</span><span class="detail-value">${eq.description}</span></div>` : ''}
+            <div class="card-detail"><span class="detail-label">ID do Poço</span><span class="detail-value"><code>${escapeHtml(eq.poco_id)}</code></span></div>
+            <div class="card-detail"><span class="detail-label">Localização</span><span class="detail-value">${escapeHtml(eq.location || '—')}</span></div>
+            <div class="card-detail"><span class="detail-label">Cmd</span><span class="detail-value"><span class="topic-chip">${escapeHtml(eq.topic_cmd)}</span></span></div>
+            <div class="card-detail"><span class="detail-label">Dados</span><span class="detail-value"><span class="topic-chip">${escapeHtml(eq.topic_dados)}</span></span></div>
+            ${hasNivel ? `<div class="card-detail"><span class="detail-label" style="color:rgba(0,188,212,0.8)"><i class="fas fa-ruler-vertical"></i> Sensor Nível</span><span class="detail-value"><span class="nivel-topic-chip">${escapeHtml(eq.nivel_topic)}</span></span></div>` : ''}
+            ${eq.description ? `<div class="card-detail"><span class="detail-label">Descrição</span><span class="detail-value">${escapeHtml(eq.description)}</span></div>` : ''}
             <div class="card-actions">
                 <button class="btn-info"    data-open="${eq.id}"><i class="fas fa-tachometer-alt"></i> Painel</button>
                 <button class="btn-warning" data-edit="${eq.id}"><i class="fas fa-edit"></i> Editar</button>
@@ -375,6 +411,16 @@ function render() {
         if (btn.dataset.edit) openEdit(eq);
         if (btn.dataset.del)  openDelete(eq);
     };
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
 }
 
 // ── PREVIEW TÓPICOS ──
@@ -469,7 +515,39 @@ $('confirm-ok').onclick = async () => {
     catch(err) { showErr(err.message); closeConfirm(); }
 };
 
+// ── SORT BUTTONS ──
+function updateSortButtons() {
+    const alphaBtn = $('sort-alpha');
+    const typeBtn = $('sort-type');
+    const dateBtn = $('sort-date');
+    
+    alphaBtn.classList.remove('active');
+    typeBtn.classList.remove('active');
+    dateBtn.classList.remove('active');
+    
+    if (currentSort === 'alpha') alphaBtn.classList.add('active');
+    else if (currentSort === 'type') typeBtn.classList.add('active');
+    else if (currentSort === 'date') dateBtn.classList.add('active');
+}
+
+$('sort-alpha').onclick = () => {
+    currentSort = 'alpha';
+    updateSortButtons();
+    render();
+};
+$('sort-type').onclick = () => {
+    currentSort = 'type';
+    updateSortButtons();
+    render();
+};
+$('sort-date').onclick = () => {
+    currentSort = 'date';
+    updateSortButtons();
+    render();
+};
+
 load();
+updateSortButtons();
 </script>
 </body>
 </html>
